@@ -1,0 +1,5 @@
+framework module "boostShared" {
+    umbrella header "boostShared.h"
+    export *
+    module * { export * }
+}
