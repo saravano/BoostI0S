@@ -74,15 +74,7 @@ struct CardSelectionDialog: View {
     
     private func persistSelection() {
         // Compute diffs against the view model's current savedCards
-        let current = viewModel.savedCards
-        let added = savedCards.subtracting(current)
-        let removed = current.subtracting(savedCards)
-        for card in added {
-            viewModel.saveCardSelection(card, isSelected: true)
-        }
-        for card in removed {
-            viewModel.saveCardSelection(card, isSelected: false)
-        }
+        Task { await viewModel.userDataManager.saveCardSelection(savedCards) }
     }
 }
 

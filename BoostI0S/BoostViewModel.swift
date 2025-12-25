@@ -11,6 +11,7 @@ import Combine
 import CoreLocation
 import boostShared
 
+@MainActor
 class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     @Published var boostMessage = "Vibing with the ether..."
@@ -19,14 +20,13 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var showConfig = false
     @Published var showPopup = true
     
-    private var userDataManager = UserDataManager()
+    public var userDataManager = UserDataManager()
     private let locationService: LocationServiceType  = LocationService()
     private let apiService: ApiService = ApiService()
     private let utility: Utility = Utility()
 
     override init() {
         super.init()
-        Task { await loadData() }
     }
     
     func initializeData(_ cards: Set<String>) {
@@ -34,23 +34,21 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         showConfig = cards.isEmpty
     }
     
-    func saveCardSelection(_ cardName: String, isSelected: Bool) {
-        if isSelected {
-            savedCards.insert(cardName)
-        } else {
-            savedCards.remove(cardName)
-        }
-        Task { await userDataManager.saveCardSelection(savedCards) }
+    func saveCardSelection(cards: Set<String>) {
+        savedCards = cards
+        isDataLoaded = true
+        showConfig = false
+        Task { await userDataManager.saveCardSelection(cards) }
     }
-    
+
+    @MainActor
     func loadData() async {
         savedCards = await userDataManager.selectedCards
         isDataLoaded = true
-        await MainActor.run { 
-            self.initializeData(self.savedCards) 
-        }
+        showConfig = savedCards.isEmpty
     }
     
+    @MainActor
     func determineCard() {
         Task { await self.handleDetermineCard() }
     }
@@ -58,15 +56,12 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     private func handleDetermineCard() async {
         do {
             let coord = try await refreshLocation()
-            boostMessage = String(format: "Lat: %.6f, Lon: %.6f", coord.latitude, coord.longitude)
-            
+  
             // use coord
             let placeId = try await apiService.callGeocodeApiSuspend(lat: String(coord.latitude), lng: String(coord.longitude))
-            boostMessage = "Place ID: \(placeId ?? "<unknown>")"
-            
+              
             // get place type
             let placeName = try await apiService.callPlacesApiSuspend(placeId: placeId)
-            boostMessage = "Place Name: \(placeName ?? "<unknown>")"
             
             // parse place details in Swift
             let rawPlaceName = placeName ?? ""
@@ -91,13 +86,13 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             locationService.requestCurrentLocation { result in
                 switch result {
                 case .success(let coord):
-                    self.boostMessage = String(format: "Lat: %.6f, Lon: %.6f", coord.latitude, coord.longitude)
                     continuation.resume(returning: coord)
                 case .failure(let error):
                     print("Location error: \(error)")
                     continuation.resume(throwing: error)
                 }
             }
+            
         }
     }
 }

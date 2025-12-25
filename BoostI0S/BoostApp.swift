@@ -15,6 +15,8 @@ struct BoostApp: App {
         WindowGroup {
             MainView()
         }
+        .windowResizability(.contentSize)
     }
 }
+
 

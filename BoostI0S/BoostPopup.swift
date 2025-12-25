@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct BoostPopupView: View {
-    @Environment(\.dismiss) private var dismiss
     @State private var showConfiguration = false
     let message: String
     let cards: [String: [String]]
@@ -22,7 +21,7 @@ struct BoostPopupView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                 }
-                .onTapGesture { dismiss() }
+                .onTapGesture { exit(0) }
                 .onLongPressGesture { showConfiguration = true }
         }
         .fullScreenCover(isPresented: $showConfiguration) {
@@ -32,5 +31,8 @@ struct BoostPopupView: View {
                 viewModel: viewModel
             )
         }
+        .background(.black)
+        .ignoresSafeArea()
     }
 }
+

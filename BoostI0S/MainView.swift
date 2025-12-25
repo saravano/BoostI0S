@@ -33,20 +33,17 @@ struct MainView: View {
             }
             isDataLoaded = true
         }
-        .sheet(isPresented: $showingCardDialog) {
+        .sheet(isPresented: $showingCardDialog, onDismiss: {
+            viewModel.determineCard()
+        } ){
             CardSelectionDialog(
                 cards: utility.cardDefinitions,
                 savedCards: $viewModel.savedCards,
                 viewModel: viewModel
             )
         }
-        .onChange(of: showingCardDialog) { newValue in
-            if !newValue {  // Dialog just closed
-                viewModel.determineCard()
-            }
-        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.clear)
+        .background(.black)
         .ignoresSafeArea()
 
     }
