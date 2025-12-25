@@ -38,8 +38,7 @@ struct GroupedCheckboxList: View {
         }
     }
 }
-#if DEBUG
-// Minimal fallback to avoid compile errors if GroupHeader isn't defined elsewhere.
+
 private struct GroupHeader: View {
     let groupName: String
     var body: some View {
@@ -54,5 +53,5 @@ private struct GroupHeader: View {
         .background(Color.clear)
     }
 }
-#endif
+
 
