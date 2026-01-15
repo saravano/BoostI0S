@@ -53,35 +53,15 @@
 			membershipExceptions = (
 				Info.plist,
 			);
-			platformFiltersByRelativePath = {
-				boostShared.xcframework = (ios, );
-			};
 			target = 56BD89DA2EF05F850014E20D /* BoostI0S */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		416CCFE92EF9D39E00A40E30 /* Exceptions for "BoostI0S" folder in "Embed Frameworks" phase from "BoostI0S" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			attributesByRelativePath = {
-				boostShared.xcframework = (CodeSignOnCopy, RemoveHeadersOnCopy, );
-			};
-			buildPhase = 416CCFE82EF9D39E00A40E30 /* Embed Frameworks */;
-			membershipExceptions = (
-				boostShared.xcframework,
-			);
-			platformFiltersByRelativePath = {
-				boostShared.xcframework = (ios, );
-			};
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		56BD89DD2EF05F850014E20D /* BoostI0S */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				56EC3CBF2EF2B49E006FC01E /* Exceptions for "BoostI0S" folder in "BoostI0S" target */,
-				416CCFE92EF9D39E00A40E30 /* Exceptions for "BoostI0S" folder in "Embed Frameworks" phase from "BoostI0S" target */,
 			);
 			path = BoostI0S;
 			sourceTree = "<group>";
@@ -289,8 +269,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		56BD8A332EF1DC170014E20D /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			files = (
 			);
 			inputFileListPaths = (
@@ -301,9 +280,9 @@
 			);
 			outputPaths = (
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nXC_DEST=\"${SRCROOT}/boostShared.xcframework\"\n\n# Only rebuild if framework doesn't exist or Kotlin code changed\nif [ ! -d \"$XC_DEST\" ] || [ \"${SRCROOT}/../boostShared/src\" -nt \"$XC_DEST\" ]; then\n    echo \"🔨 Building boostShared XCFramework...\"\n    cd \"${SRCROOT}/../BoostAndroid\"\n    ./gradlew :boostShared:assembleXCFramework\n    \n    mkdir -p \"${SRCROOT}/Frameworks\"\n    rm -rf \"$XC_DEST\"\n    cp -R \"boostShared/build/XCFrameworks/release/boostShared.xcframework\" \"${SRCROOT}/\"\n    echo \"✅ XCFramework updated\"\nelse\n    echo \"ℹ️ XCFramework up to date, skipping build\"\nfi\n\n";
+			shellScript = "set -e\n\nXC_DEST=\"${SRCROOT}/boostShared.xcframework\"\n\n# Only rebuild if framework doesn't exist or Kotlin code changed\nif [ ! -d \"$XC_DEST\" ] || [ \"${SRCROOT}/../boostShared/src\" -nt \"$XC_DEST\" ]; then\n    echo \"🔨 Building boostShared XCFramework...\"\n    cd \"${SRCROOT}/../BoostAndroid\"\n    ./gradlew :boostShared:assembleXCFramework\n    ./gradlew :boostShared:embedAndSignAppleFrameworkForXcode\n    \necho    mkdir -p \"${SRCROOT}/Frameworks\"\necho    rm -rf \"$XC_DEST\"\necho    cp -R \"boostShared/build/XCFrameworks/release/boostShared.xcframework\" \"${SRCROOT}/\"\n    echo \"✅ XCFramework updated\"\nelse\n    echo \"ℹ️ XCFramework up to date, skipping build\"\nfi\n\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -380,7 +359,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -402,6 +381,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -456,6 +436,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -511,7 +492,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -524,9 +505,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = D6RMU752DL;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = D6RMU752DL;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -557,6 +540,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = SAVO.BoostI0S;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = SAVO_IOS_BOOST;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -566,7 +550,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TARGETED_DEVICE_FAMILY = 1;
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;

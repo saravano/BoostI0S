@@ -7,22 +7,29 @@ struct BoostPopupView: View {
     let savedCards: Set<String>
     @ObservedObject var viewModel: BoostViewModel
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         VStack {
-            RoundedRectangle(cornerRadius: 50)
-                .stroke(.yellow, lineWidth: 3)
-                .frame(height: 100)
-                .background(.black.opacity(0.8))
-                .overlay(alignment: .center) {
-                    Text(message)
-                        .foregroundStyle(.white)
-                        .font(.system(size: 18))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
+            Text(message)
+                .foregroundStyle(.white)
+                .font(.system(size: 18))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 2	0)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 50)
+                        .stroke(.yellow, lineWidth: 2)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                 }
+                .onTapGesture {
+                    if (!viewModel.nextStep()) {
+                        exit(0) 
+                    }
                 }
-                .onTapGesture { exit(0) }
-                .onLongPressGesture { showConfiguration = true }
+                .onLongPressGesture {
+                    showConfiguration = true
+                }
         }
         .fullScreenCover(isPresented: $showConfiguration) {
             CardSelectionDialog(
@@ -35,4 +42,5 @@ struct BoostPopupView: View {
         .ignoresSafeArea()
     }
 }
+
 

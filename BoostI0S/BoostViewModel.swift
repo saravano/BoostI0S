@@ -15,6 +15,7 @@ import boostShared
 class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     @Published var boostMessage = "Vibing with the ether..."
+    @Published var boostDetail: String = ""
     @Published var savedCards: Set<String> = []
     @Published var isDataLoaded = false
     @Published var showConfig = false
@@ -29,7 +30,7 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
         super.init()
     }
     
-    func initializeData(_ cards: Set<String>) {
+    func initializeData(_ cards: Set<String>) {	
         savedCards = cards
         showConfig = cards.isEmpty
     }
@@ -42,10 +43,22 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 
     @MainActor
-    func loadData() async {
+    func loadData() async  {
         savedCards = await userDataManager.selectedCards
         isDataLoaded = true
         showConfig = savedCards.isEmpty
+    }
+    
+    @MainActor
+    func nextStep() -> Bool{
+        if (boostMessage != boostDetail) {
+            print("Updating boostMessage with {\(boostDetail)}")
+            boostMessage = boostDetail
+            return true
+        }
+        else {
+            return false
+        }
     }
     
     @MainActor
@@ -71,10 +84,14 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
             // Prepare inputs for Perplexity call: join selected cards and use the parsed place name
             let cardsString = savedCards.joined(separator: ",")
-            let answerCard = try await apiService.callPerplexityLocation(cards: cardsString, placeName: name)
+            let answerCard = try await apiService.callPerplexityLocation(cards: cardsString, placeName: name, placeType: placeType)
             let innerMessage = utility.cleanupString(str: answerCard, name: name, placeType: placeType)
-            boostMessage = innerMessage
-            
+            let answerParts = innerMessage.split(separator: "::", maxSplits: 1).map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            boostMessage = answerParts.first ?? ""
+            boostDetail = answerParts.count > 1 ? answerParts[1] : ""
+            print("Determined card: \(boostMessage)")
+            print("Answer parts: \(answerParts.count)")
+            print("Detail: \(boostDetail)")
         } catch {
             // handle error (e.g., notify UI)
             print("Failed to determine card: \(error)")
@@ -94,6 +111,10 @@ class BoostViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             }
             
         }
+    }
+    
+    func updateBoostMessage(_ message: String) {
+        boostMessage = message
     }
 }
 
