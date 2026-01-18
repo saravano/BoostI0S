@@ -16,7 +16,7 @@ struct BoostPopupView: View {
                 .font(.system(size: 18))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 2	0)
+                .padding(.vertical, 20)
                 .overlay {
                     RoundedRectangle(cornerRadius: 50)
                         .stroke(.yellow, lineWidth: 2)

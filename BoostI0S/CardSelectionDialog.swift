@@ -52,8 +52,9 @@ struct CardSelectionDialog: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        persistSelection()
-                        dismiss()
+                        if (viewModel.saveCardSelection(cards: savedCards)) {
+                            dismiss()
+                        }
                     }
                     .foregroundColor(.yellow)
                     .fontWeight(.semibold)
@@ -70,11 +71,6 @@ struct CardSelectionDialog: View {
         } else {
             savedCards.insert(card)
         }
-    }
-    
-    private func persistSelection() {
-        // Compute diffs against the view model's current savedCards
-        Task { await viewModel.userDataManager.saveCardSelection(savedCards) }
     }
 }
 
